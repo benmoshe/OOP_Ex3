@@ -1,34 +1,67 @@
 class Graph_Inteface:
     """This abstract class represents an interface of a graph."""
-    def size_V(self) -> int:
-        """returns the number of vertices in this graph"""
+    def sizeV(self) -> int:
+        """
+        Returns the number of vertices in this graph
+        @return: The number of vertices in this graph
+        """
         raise NotImplementedError
 
-    def size_E(self) -> int:
-        """returns the number of edges in this graph"""
+    def sizeE(self) -> int:
+        """
+        Returns the number of edges in this graph
+        @return: The number of edges in this graph
+        """
         raise NotImplementedError
 
     def MC(self) -> int:
-        """returns the current version of this graph,
-        on every change in the graph state - the MC should be increased"""
+        """
+        Returns the current version of this graph,
+        on every change in the graph state - the MC should be increased
+        @return: The current version of this graph.
+        """
         raise NotImplementedError
 
-    def add_edge(self, id1:int, id2:int, weight: float) -> bool:
-        """add a new edge to the graph,  Note: if the edge already
-        exists - no edge will be added"""
+    def addEdge(self, id1:int, id2:int, weight: float) -> bool:
+        """
+        Adds an edge to the graph.
+        @param node_id1: The start node of the edge
+        @param node_id2: The end node of the edge
+        @param weight: The weight of the edge
+        @return: True if the edge was added successfully, False o.w.
+
+        Note: If the edge already exists or one of the nodes dose not exists the functions will do nothing
+        """
         raise NotImplementedError
 
-    def add_node(self, node_id: int) -> bool:
-        """add a new node to the graph,  Note: if the node already
-        exists - no node will be added"""
+    def addNode(self, node_id: int, pos: tuple = None) -> bool:
+        """
+        Adds a node to the graph.
+        @param node_id: The node ID
+        @param pos: The position of the node
+        @return: True if the node was added successfully, False o.w.
+
+        Note: if the node id already exists the node will not be added
+        """
         raise NotImplementedError
 
-    def remove_node(self, node_id: int) -> bool:
-        """removes the node from the graph,  Note: if the node
-        does NOT exists - does nothing."""
+    def removeNode(self, node_id: int) -> bool:
+        """
+        Removes a node from the graph.
+        @param node_id: The node ID
+        @return: True if the node was removed successfully, False o.w.
+
+        Note: if the node id does not exists the function will do nothing
+        """
         raise NotImplementedError
 
-    def remove_edge(self, node_id1: int, node_id2: int) -> bool:
-         """removes the edge to from graph,  Note: if the edge
-           does NOT exists - does nothing."""
-         raise NotImplementedError
+    def removeEdge(self, node_id1: int, node_id2: int) -> bool:
+        """
+        Removes an edge from the graph.
+        @param node_id1: The start node of the edge
+        @param node_id2: The end node of the edge
+        @return: True if the edge was removed successfully, False o.w.
+
+        Note: If such an edge does not exists the function will do nothing
+        """
+        raise NotImplementedError

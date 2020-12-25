@@ -8,12 +8,12 @@ kOUT = "out"
 kIN = "in"
 
 
-class Node():
-    def __init__(self, n_id):
+class Node(object):
+    def __init__(self, n_id: int, pos: tuple = None):
         self.n_id = n_id
         self.out_edge = dict()
         self.in_edge = dict()
-        self.pos = None
+        self.pos = pos
         self.score = float('inf')
 
     def __lt__(self, other):
@@ -27,22 +27,22 @@ class DiGraph(Graph_Inteface):
         self.edge_num = 0
         self._mc = 0
 
-    def size_V(self) -> int:
+    def sizeV(self) -> int:
         """returns the number of vertices in this graph"""
         return len(self.nodes)
 
-    def size_E(self) -> int:
+    def sizeE(self) -> int:
         """returns the number of edges in this graph"""
         return self.edge_num
 
-    def add_node(self, node_id: int) -> bool:
+    def add_node(self, node_id: int, pos: tuple = None) -> bool:
         if node_id in self.nodes:
             return False
-        self.nodes[node_id] = Node(node_id)
+        self.nodes[node_id] = Node(node_id, pos)
         self._mc += 1
         return True
 
-    def add_edge(self, id1: int, id2: int, weight: float) -> bool:
+    def addEdge(self, id1: int, id2: int, weight: float) -> bool:
         if id1 not in self.nodes or id2 not in self.nodes:
             return False
 
