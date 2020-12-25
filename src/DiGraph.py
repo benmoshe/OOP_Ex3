@@ -1,8 +1,4 @@
-from copy import deepcopy
-
 from Graph_Interface import Graph_Inteface
-import numpy as np
-import matplotlib.pyplot as plt
 
 kOUT = "out"
 kIN = "in"
@@ -27,6 +23,12 @@ class DiGraph(Graph_Inteface):
         self.edge_num = 0
         self._mc = 0
 
+    def allV(self):
+        """return a dictionary with all the nodes in the Graph, each node is represented using a pair (key, node_data).
+        """
+        return self.nodes
+
+        """ """
     def sizeV(self) -> int:
         """returns the number of vertices in this graph"""
         return len(self.nodes)
@@ -42,7 +44,7 @@ class DiGraph(Graph_Inteface):
         self._mc += 1
         return True
 
-    def addEdge(self, id1: int, id2: int, weight: float) -> bool:
+    def add_edge(self, id1: int, id2: int, weight: float) -> bool:
         if id1 not in self.nodes or id2 not in self.nodes:
             return False
 
@@ -76,3 +78,22 @@ class DiGraph(Graph_Inteface):
         """returns the current version of this graph,
         on every change in the graph state - the MC should be increased"""
         return self._mc
+
+    def all_in_edges_of_node(self, id:int) -> dict:
+        """
+
+        :param id: node id (key)
+        :return: all edges getting int id
+        """
+
+        node = self.nodes[id]
+        ans = node.in_edge
+        return ans;
+
+    def all_out_edges_of_node(self, id:int) -> dict:
+        """
+
+        :param id: node id (key)
+        :return: all edges getting out of node id
+        """
+        return self.nodes[id].out_edge

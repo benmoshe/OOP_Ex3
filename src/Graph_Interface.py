@@ -13,8 +13,19 @@ class Graph_Inteface:
         @return: The number of edges in this graph
         """
         raise NotImplementedError
+    def allV(self) -> dict:
+        """return a dictionary of all the nodes in the Graph, each node is represented using apair  (key, node_data)
+        """
+
+    def all_in_edges_of_node(self, id:int) -> dict:
+        """return a dictionary of all the nodes connected to (into) node_id , each node is represented using apair  (key, weight)
+         """
+    def all_out_edges_of_node(self, id: int) -> dict:
+        """return a dictionary of all the nodes connected from node_id , each node is represented using apair  (key, weight)
+              """
 
     def MC(self) -> int:
+
         """
         Returns the current version of this graph,
         on every change in the graph state - the MC should be increased
@@ -22,7 +33,7 @@ class Graph_Inteface:
         """
         raise NotImplementedError
 
-    def addEdge(self, id1:int, id2:int, weight: float) -> bool:
+    def add_edge(self, id1:int, id2:int, weight: float) -> bool:
         """
         Adds an edge to the graph.
         @param node_id1: The start node of the edge
@@ -34,7 +45,7 @@ class Graph_Inteface:
         """
         raise NotImplementedError
 
-    def addNode(self, node_id: int, pos: tuple = None) -> bool:
+    def add_node(self, node_id: int, pos: tuple = None) -> bool:
         """
         Adds a node to the graph.
         @param node_id: The node ID
@@ -45,7 +56,7 @@ class Graph_Inteface:
         """
         raise NotImplementedError
 
-    def removeNode(self, node_id: int) -> bool:
+    def remove_node(self, node_id: int) -> bool:
         """
         Removes a node from the graph.
         @param node_id: The node ID
@@ -55,7 +66,7 @@ class Graph_Inteface:
         """
         raise NotImplementedError
 
-    def removeEdge(self, node_id1: int, node_id2: int) -> bool:
+    def remove_edge(self, node_id1: int, node_id2: int) -> bool:
         """
         Removes an edge from the graph.
         @param node_id1: The start node of the edge

@@ -8,10 +8,16 @@ from Graph_Algo_Interface import Graph_Algo_Interface
 import numpy as np
 import matplotlib.pyplot as plt
 
+from src import Graph_Interface
+
 
 class GraphAlgo(Graph_Algo_Interface):
-    def __init__(self):
-        self.di_graph = DiGraph()
+    def __init__(self, graph: Graph_Interface = None):
+        self.di_graph = graph
+
+    def get_graph(self):
+        """    :return: the graph DS on which this algorithm class works on"""
+        return self.di_graph
 
     def loadFomJson(self, file_name: str) -> bool:
         """
@@ -63,30 +69,11 @@ class GraphAlgo(Graph_Algo_Interface):
         try:
             with open(file_name, 'w') as json_file:
                 json.dump(graph_json, json_file)
+              #  print(graph_json)
         except:
             return False
 
         return True
-
-    def addNode(self, node_id: int, pos: tuple = None) -> bool:
-        """add a new node to the graph,  Note: if the node already
-        exists - no node will be added"""
-        return self.di_graph.add_node(node_id, pos)
-
-    def addEdge(self, node_id1: int, node_id2: int, weight: float) -> bool:
-        """removes the edge to from graph,  Note: if the edge
-          does NOT exists - does nothing."""
-        return self.di_graph.addEdge(node_id1, node_id2, weight)
-
-    def removeNode(self, node_id: int) -> bool:
-        """removes the node from the graph,  Note: if the node
-        does NOT exists - does nothing."""
-        return self.di_graph.remove_node(node_id)
-
-    def removeEdge(self, node_id1: int, node_id2: int) -> bool:
-        """removes the edge to from graph,  Note: if the edge
-          does NOT exists - does nothing."""
-        return self.di_graph.remove_edge(node_id1, node_id2)
 
     def shortestPath(self, id1: int, id2: int) -> (float, list):
         """
@@ -204,7 +191,7 @@ class GraphAlgo(Graph_Algo_Interface):
                           head_length=0.1 * l,
                           width=diff_x
                           )
-            plt.text(n.pos[0] + a_pad, n.pos[1], n.n_id, fontsize=25, color='limegreen')
+            plt.text(n.pos[0] + a_pad, n.pos[1], n.n_id, fontsize=12, color='limegreen')
         for n in nodes.values():
             plt.plot(n.pos[0], n.pos[1], 'or')
 
