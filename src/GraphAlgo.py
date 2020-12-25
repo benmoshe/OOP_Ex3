@@ -180,20 +180,21 @@ class GraphAlgo(Graph_Algo_Interface):
             placed.append(n)
 
         diff_x = max_x - min_x
-        diff_x = 0.0002 / diff_x
-        diff_x = max(diff_x, .0002)
+        diff_x = diff_x / 1000000
+        # diff_x = min(diff_x, .0002)
         nodes = {n.n_id: n for n in placed}
         a_pad = .0
         for n in nodes.values():
             for o in n.out_edge.keys():
                 dx = nodes[o].pos[0] - n.pos[0]
                 dy = nodes[o].pos[1] - n.pos[1]
+                l = np.sqrt(dx**2+dy**2)
                 plt.arrow(n.pos[0], n.pos[1],
                           dx, dy,
                           color='k',
                           length_includes_head=True,
-                          # head_width=diff_x/2,
-                          # head_length=diff_x,
+                          head_width=0.05*l,
+                          head_length=0.1*l,
                           width=diff_x
                           )
             plt.text(n.pos[0] + a_pad, n.pos[1], n.n_id, fontsize=25, color='limegreen')
