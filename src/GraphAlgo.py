@@ -1,4 +1,6 @@
+import heapq
 import json
+from copy import deepcopy
 
 from DiGraph import DiGraph
 from Graph_Algo_Interface import Graph_Algo_Interface
@@ -79,25 +81,93 @@ class GraphAlgo(Graph_Algo_Interface):
           does NOT exists - does nothing."""
         return self.di_graph.remove_edge(node_id1, node_id2)
 
-    def shortest_path(self, id1: int, id2: int) -> [float, list]:
-        """returns a list with the length pf the shortest path and a
-        list (inner) with the path (from id1, ... id2)"""
-        raise NotImplementedError
+    def shortest_path(self, id1: int, id2: int) -> (float, list):
+        """
+        Returns a tuple with the length of the shortest path and the path as a list.
+        If there is no path from id1 to id2, returns (float('inf'),[])
+        """
+        if id1 not in self.di_graph.nodes or id2 not in self.di_graph.nodes:
+            return float('inf'), []
+        if id1 == id2:
+            return 0, [id1]
+        node_lst = [self.di_graph.nodes[id1]]
+        node_lst[0].score = 0
+        explored_nodes = set()
+        heapq.heapify(node_lst)
+
+        found = False
+        while len(node_lst) > 0 and not found:
+            pivot = heapq.heappop(node_lst)
+            explored_nodes.add(pivot)
+
+            for p_idx, e_weight in pivot.out_edge.items():
+                neigh = self.di_graph.nodes[p_idx]
+                if neigh in explored_nodes:
+                    continue
+                neigh.parent = pivot
+                neigh.score = pivot.score + e_weight
+                if p_idx == id2:
+                    found = True
+                    break
+                heapq.heappush(node_lst, neigh)
+            if found:
+                break
+
+        if found:
+            path = []
+            curr = self.di_graph.nodes[id2]
+            while not curr.n_id == id1:
+                path.insert(0, curr.n_id)
+                curr = curr.parent
+            path.insert(0, curr.n_id)
+
+            return self.di_graph.nodes[id2].score, path
+        else:
+            return float('inf'), []
+
+    @staticmethod
+    def dfs(di_graph: DiGraph, id1: int):
+        stack = [id1]
+        explored = set()
+        while stack:
+            pivot = stack.pop()
+            explored.add(pivot)
+            p_neighbors = list(di_graph.nodes[pivot].out_edge.keys())
+            [stack.append(v) for v in p_neighbors if v not in explored]
+
+        return list(explored)
 
     def connected_component(self, id1: int) -> list:
         """the strongly  connected  component of id1."""
-        raise NotImplementedError
+
+        con_fwd = set(GraphAlgo.dfs(self.di_graph, id1))
+        reverse_graph = deepcopy(self.di_graph)
+        for n in reverse_graph.nodes.values():
+            n.out_edge, n.in_edge = n.in_edge, n.out_edge
+
+        con_bwd = set(GraphAlgo.dfs(reverse_graph, id1))
+        return list(con_bwd & con_fwd)
 
     def connected_components(self) -> list:
         """ a list of ALL strongly  connected  components of self."""
-        raise NotImplementedError
+        all_nodes = list(self.di_graph.nodes.keys())
 
-    def plotGraph(self) -> list:
+        all_comps = []
+        while all_nodes:
+            v = all_nodes[0]
+            cc_v = self.connected_component(v)
+            [all_nodes.remove(v_r) for v_r in cc_v]
+            all_comps.append(cc_v)
+
+        return all_comps
+
+    def plotGraph(self):
         """"""
         np.random.seed(42)
         w = h = len(self.di_graph.nodes) ** 1.5
         nodes = [v for v in self.di_graph.nodes.values()]
         placed = []
+        min_x, max_x = 0, 0
         for n in nodes:
             p_connected = [p for p in placed if p in n.out_edge or p in n.in_edge]
             if n.pos is None:
@@ -105,9 +175,13 @@ class GraphAlgo(Graph_Algo_Interface):
                     n.pos = np.random.random(2) * np.array([w, h])
                 else:
                     n.pos = np.mean([p.pos for p in p_connected], 0)
-
+            min_x = min(min_x, n.pos[0])
+            max_x = max(max_x, n.pos[0])
             placed.append(n)
 
+        diff_x = max_x - min_x
+        diff_x = 0.0002 / diff_x
+        diff_x = max(diff_x, .0002)
         nodes = {n.n_id: n for n in placed}
         a_pad = .0
         for n in nodes.values():
@@ -118,11 +192,11 @@ class GraphAlgo(Graph_Algo_Interface):
                           dx, dy,
                           color='k',
                           length_includes_head=True,
-                          head_width=0.0002,
-                          head_length=.0005,
-                          width=.00001)
-                # plt.plot([n.pos[0],nodes[o].pos[0]], [n.pos[1],nodes[o].pos[1]],'b')
-            plt.text(n.pos[0] + a_pad, n.pos[1] - .3, n.n_id, fontsize=25, color='limegreen')
+                          # head_width=diff_x/2,
+                          # head_length=diff_x,
+                          width=diff_x
+                          )
+            plt.text(n.pos[0] + a_pad, n.pos[1], n.n_id, fontsize=25, color='limegreen')
         for n in nodes.values():
             plt.plot(n.pos[0], n.pos[1], 'or')
 

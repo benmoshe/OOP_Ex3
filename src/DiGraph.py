@@ -14,6 +14,10 @@ class Node():
         self.out_edge = dict()
         self.in_edge = dict()
         self.pos = None
+        self.score = float('inf')
+
+    def __lt__(self, other):
+        return self.score < other.score
 
 
 class DiGraph(Graph_Inteface):
