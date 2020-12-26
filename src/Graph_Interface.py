@@ -1,19 +1,19 @@
 class Graph_Inteface:
     """This abstract class represents an interface of a graph."""
-    def sizeV(self) -> int:
+    def v_size(self) -> int:
         """
         Returns the number of vertices in this graph
         @return: The number of vertices in this graph
         """
         raise NotImplementedError
 
-    def sizeE(self) -> int:
+    def e_size(self) -> int:
         """
         Returns the number of edges in this graph
         @return: The number of edges in this graph
         """
         raise NotImplementedError
-    def allV(self) -> dict:
+    def all_v(self) -> dict:
         """return a dictionary of all the nodes in the Graph, each node is represented using apair  (key, node_data)
         """
 

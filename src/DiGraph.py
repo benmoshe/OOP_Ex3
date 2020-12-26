@@ -12,6 +12,10 @@ class Node(object):
         self.pos = pos
         self.score = float('inf')
 
+    def __repr__(self):
+        # return "{}: OE={}, IE={}".format(self.n_id, len(self.out_edge), len(self.in_edge))
+        return "{}: score {}".format(self.n_id, self.score)
+
     def __lt__(self, other):
         return self.score < other.score
 

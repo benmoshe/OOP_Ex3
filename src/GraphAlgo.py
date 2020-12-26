@@ -55,8 +55,8 @@ class GraphAlgo(GraphAlgoInterface):
                       "Edges": []}
         for n in self.di_graph.nodes.values():
             pp = {"id": n.n_id}
-            if n.pos!=None:
-                pp["pos"] = str(n.pos[0])+","+str(n.pos[1])+","+str(n.pos[2])
+            if n.pos is not None:
+                pp["pos"] = str(n.pos[0]) + "," + str(n.pos[1]) + "," + str(n.pos[2])
             graph_json["Nodes"].append(pp)
             for k, v in n.out_edge.items():
                 graph_json["Edges"].append({
@@ -79,7 +79,7 @@ class GraphAlgo(GraphAlgoInterface):
         If there is no path from id1 to id2, returns (float('inf'),[])
         """
         if id1 not in self.di_graph.nodes or id2 not in self.di_graph.nodes:
-            return float('inf'), []
+            return float('inf'), None
         if id1 == id2:
             return 0, [id1]
         node_lst = [self.di_graph.nodes[id1]]
@@ -91,6 +91,9 @@ class GraphAlgo(GraphAlgoInterface):
         while len(node_lst) > 0 and not found:
             pivot = heapq.heappop(node_lst)
             explored_nodes.add(pivot)
+            if pivot.n_id == id2:
+                found = True
+                break
 
             for p_idx, e_weight in pivot.out_edge.items():
                 neigh = self.di_graph.nodes[p_idx]
@@ -98,12 +101,8 @@ class GraphAlgo(GraphAlgoInterface):
                     continue
                 neigh.parent = pivot
                 neigh.score = pivot.score + e_weight
-                if p_idx == id2:
-                    found = True
-                    break
+
                 heapq.heappush(node_lst, neigh)
-            if found:
-                break
 
         if found:
             path = []
@@ -115,7 +114,7 @@ class GraphAlgo(GraphAlgoInterface):
 
             return self.di_graph.nodes[id2].score, path
         else:
-            return float('inf'), []
+            return float('inf'), None
 
     @staticmethod
     def dfs(di_graph: DiGraph, id1: int):

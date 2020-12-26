@@ -10,7 +10,7 @@ class Graph_Algo_Interface:
         :return: the directed graph on which the algorithm works on.
         """
 
-    def loadFomJson(self, file_name: str) -> bool:
+    def load_from_json(self, file_name: str) -> bool:
         """
         Loads a graph from a json file.
         @param file_name: The path to the json file
@@ -19,7 +19,7 @@ class Graph_Algo_Interface:
 
         raise NotImplementedError
 
-    def save2Json(self, file_name: str) -> bool:
+    def save_to_json(self, file_name: str) -> bool:
         """
         Saves the graph in JSON format to a file
         @param file_name: The path to the out file
@@ -28,7 +28,7 @@ class Graph_Algo_Interface:
         raise NotImplementedError
 
 
-    def shortestPath(self, id1: int, id2: int) -> (float, list):
+    def shortest_path(self, id1: int, id2: int) -> (float, list):
         """
         Returns the shortest path from node id1 to node id2 using Dijkstra's Algorithm
         @param id1: The start node id
@@ -48,12 +48,14 @@ class Graph_Algo_Interface:
 #        >>> g_algo.shortestPath(0,2)
 #        (5, [0, 1, 2])
 
+        Notes:
+        If there is no path between the two nodes, the function returns (float('inf'),None)
         More info:
         https://en.wikipedia.org/wiki/Dijkstra's_algorithm
         """
         raise NotImplementedError
 
-    def connectedComponent(self, id1: int) -> list:
+    def connected_component(self, id1: int) -> list:
         """
         Finds the Strongly Connected Component(SCC) that node id1 is a part of.
         @param id1: The node id
@@ -61,14 +63,14 @@ class Graph_Algo_Interface:
         """
         raise NotImplementedError
 
-    def connectedComponents(self) -> List[list]:
+    def connected_components(self) -> List[list]:
         """
         Finds all the Strongly Connected Component(SCC) in the graph.
         @return: The list all SCC
         """
         raise NotImplementedError
 
-    def plotGraph(self) -> None:
+    def plot_graph(self) -> None:
         """
         Plots the graph.
         If the nodes have a position, the nodes will be placed there.
