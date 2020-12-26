@@ -4,16 +4,22 @@ from copy import deepcopy
 from typing import List
 
 from DiGraph import DiGraph
-from Graph_Algo_Interface import Graph_Algo_Interface
+from GraphAlgoInterface import GraphAlgoInterface
 import numpy as np
 import matplotlib.pyplot as plt
 
+from src import GraphInterface
 
-class GraphAlgo(Graph_Algo_Interface):
-    def __init__(self):
-        self.di_graph = DiGraph()
 
-    def loadFomJson(self, file_name: str) -> bool:
+class GraphAlgo(GraphAlgoInterface):
+    def __init__(self, graph: GraphInterface = None):
+        self.di_graph = graph
+
+    def get_graph(self):
+        """    :return: the graph DS on which this algorithm class works on"""
+        return self.di_graph
+
+    def load_from_json(self, file_name: str) -> bool:
         """
         Loads a graph from a json file.
         @param file_name: The path to the json file
@@ -37,22 +43,21 @@ class GraphAlgo(Graph_Algo_Interface):
                     src = e['src']
                     dst = e['dest']
                     w = e['w']
-                    self.di_graph.addEdge(src, dst, w)
+                    self.di_graph.add_edge(src, dst, w)
         except:
             return False
-
         return True
 
-    def save2Json(self, file_name: str) -> bool:
+    def save_to_json(self, file_name: str) -> bool:
 
-        """save the graph to a jso file"""
+        """save the graph to a json file"""
         graph_json = {"Nodes": [],
                       "Edges": []}
         for n in self.di_graph.nodes.values():
-            graph_json["Nodes"].append({
-                "pos": ','.join([str(x) for x in n.pos]),
-                "id": n.n_id
-            })
+            pp = {"id": n.n_id}
+            if n.pos!=None:
+                pp["pos"] = str(n.pos[0])+","+str(n.pos[1])+","+str(n.pos[2])
+            graph_json["Nodes"].append(pp)
             for k, v in n.out_edge.items():
                 graph_json["Edges"].append({
                     "src": n.n_id,
@@ -68,27 +73,7 @@ class GraphAlgo(Graph_Algo_Interface):
 
         return True
 
-    def addNode(self, node_id: int, pos: tuple = None) -> bool:
-        """add a new node to the graph,  Note: if the node already
-        exists - no node will be added"""
-        return self.di_graph.add_node(node_id, pos)
-
-    def addEdge(self, node_id1: int, node_id2: int, weight: float) -> bool:
-        """removes the edge to from graph,  Note: if the edge
-          does NOT exists - does nothing."""
-        return self.di_graph.addEdge(node_id1, node_id2, weight)
-
-    def removeNode(self, node_id: int) -> bool:
-        """removes the node from the graph,  Note: if the node
-        does NOT exists - does nothing."""
-        return self.di_graph.remove_node(node_id)
-
-    def removeEdge(self, node_id1: int, node_id2: int) -> bool:
-        """removes the edge to from graph,  Note: if the edge
-          does NOT exists - does nothing."""
-        return self.di_graph.remove_edge(node_id1, node_id2)
-
-    def shortestPath(self, id1: int, id2: int) -> (float, list):
+    def shortest_path(self, id1: int, id2: int) -> (float, list):
         """
         Returns a tuple with the length of the shortest path and the path as a list.
         If there is no path from id1 to id2, returns (float('inf'),[])
@@ -144,7 +129,7 @@ class GraphAlgo(Graph_Algo_Interface):
 
         return list(explored)
 
-    def connectedComponent(self, id1: int) -> list:
+    def connected_component(self, id1: int) -> list:
         """the strongly  connected  component of id1."""
 
         con_fwd = set(GraphAlgo.dfs(self.di_graph, id1))
@@ -155,20 +140,20 @@ class GraphAlgo(Graph_Algo_Interface):
         con_bwd = set(GraphAlgo.dfs(reverse_graph, id1))
         return list(con_bwd & con_fwd)
 
-    def connectedComponents(self) -> List[list]:
+    def connected_components(self) -> List[list]:
         """ a list of ALL strongly  connected  components of self."""
         all_nodes = list(self.di_graph.nodes.keys())
 
         all_comps = []
         while all_nodes:
             v = all_nodes[0]
-            cc_v = self.connectedComponent(v)
+            cc_v = self.connected_component(v)
             [all_nodes.remove(v_r) for v_r in cc_v]
             all_comps.append(cc_v)
 
         return all_comps
 
-    def plotGraph(self) -> None:
+    def plot_graph(self) -> None:
         """"""
         np.random.seed(42)
         w = h = len(self.di_graph.nodes) ** 1.5
@@ -203,7 +188,7 @@ class GraphAlgo(Graph_Algo_Interface):
                           head_length=0.1 * l,
                           width=diff_x
                           )
-            plt.text(n.pos[0] + a_pad, n.pos[1], n.n_id, fontsize=25, color='limegreen')
+            plt.text(n.pos[0] + a_pad, n.pos[1], n.n_id, fontsize=12, color='limegreen')
         for n in nodes.values():
             plt.plot(n.pos[0], n.pos[1], 'or')
 
