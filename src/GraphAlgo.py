@@ -188,7 +188,6 @@ class GraphAlgo(Graph_Algo_Interface):
 
         diff_x = max_x - min_x
         diff_x = diff_x / 1000000
-        # diff_x = min(diff_x, .0002)
         nodes = {n.n_id: n for n in placed}
         a_pad = .0
         for n in nodes.values():
