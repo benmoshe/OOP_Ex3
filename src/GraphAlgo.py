@@ -4,22 +4,22 @@ from copy import deepcopy
 from typing import List
 
 from DiGraph import DiGraph
-from Graph_Algo_Interface import Graph_Algo_Interface
+from GraphAlgoInterface import GraphAlgoInterface
 import numpy as np
 import matplotlib.pyplot as plt
 
-from src import Graph_Interface
+from src import GraphInterface
 
 
-class GraphAlgo(Graph_Algo_Interface):
-    def __init__(self, graph: Graph_Interface = None):
+class GraphAlgo(GraphAlgoInterface):
+    def __init__(self, graph: GraphInterface = None):
         self.di_graph = graph
 
     def get_graph(self):
         """    :return: the graph DS on which this algorithm class works on"""
         return self.di_graph
 
-    def loadFomJson(self, file_name: str) -> bool:
+    def load_from_json(self, file_name: str) -> bool:
         """
         Loads a graph from a json file.
         @param file_name: The path to the json file
@@ -43,22 +43,21 @@ class GraphAlgo(Graph_Algo_Interface):
                     src = e['src']
                     dst = e['dest']
                     w = e['w']
-                    self.di_graph.addEdge(src, dst, w)
+                    self.di_graph.add_edge(src, dst, w)
         except:
             return False
-
         return True
 
-    def save2Json(self, file_name: str) -> bool:
+    def save_to_json(self, file_name: str) -> bool:
 
-        """save the graph to a jso file"""
+        """save the graph to a json file"""
         graph_json = {"Nodes": [],
                       "Edges": []}
         for n in self.di_graph.nodes.values():
-            graph_json["Nodes"].append({
-                "pos": ','.join([str(x) for x in n.pos]),
-                "id": n.n_id
-            })
+            pp = {"id": n.n_id}
+            if n.pos!=None:
+                pp["pos"] = str(n.pos[0])+","+str(n.pos[1])+","+str(n.pos[2])
+            graph_json["Nodes"].append(pp)
             for k, v in n.out_edge.items():
                 graph_json["Edges"].append({
                     "src": n.n_id,
@@ -69,13 +68,12 @@ class GraphAlgo(Graph_Algo_Interface):
         try:
             with open(file_name, 'w') as json_file:
                 json.dump(graph_json, json_file)
-              #  print(graph_json)
         except:
             return False
 
         return True
 
-    def shortestPath(self, id1: int, id2: int) -> (float, list):
+    def shortest_path(self, id1: int, id2: int) -> (float, list):
         """
         Returns a tuple with the length of the shortest path and the path as a list.
         If there is no path from id1 to id2, returns (float('inf'),[])
@@ -131,7 +129,7 @@ class GraphAlgo(Graph_Algo_Interface):
 
         return list(explored)
 
-    def connectedComponent(self, id1: int) -> list:
+    def connected_component(self, id1: int) -> list:
         """the strongly  connected  component of id1."""
 
         con_fwd = set(GraphAlgo.dfs(self.di_graph, id1))
@@ -142,20 +140,20 @@ class GraphAlgo(Graph_Algo_Interface):
         con_bwd = set(GraphAlgo.dfs(reverse_graph, id1))
         return list(con_bwd & con_fwd)
 
-    def connectedComponents(self) -> List[list]:
+    def connected_components(self) -> List[list]:
         """ a list of ALL strongly  connected  components of self."""
         all_nodes = list(self.di_graph.nodes.keys())
 
         all_comps = []
         while all_nodes:
             v = all_nodes[0]
-            cc_v = self.connectedComponent(v)
+            cc_v = self.connected_component(v)
             [all_nodes.remove(v_r) for v_r in cc_v]
             all_comps.append(cc_v)
 
         return all_comps
 
-    def plotGraph(self) -> None:
+    def plot_graph(self) -> None:
         """"""
         np.random.seed(42)
         w = h = len(self.di_graph.nodes) ** 1.5

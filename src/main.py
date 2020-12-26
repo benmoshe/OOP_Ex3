@@ -1,38 +1,56 @@
 from DiGraph import DiGraph
 from GraphAlgo import GraphAlgo
 
-def main():
-    g_algo = GraphAlgo()
-    g_algo.loadFomJson('../data/A5')
-    path, dist = g_algo.shortestPath(1, 7)
 
-    # print(g_algo.connected_component(0))
-    print(g_algo.connectedComponents())
-    g_algo.plotGraph()
-
-
-if __name__ == '__main__':
-    g = DiGraph()
-    g.add_node(0)
-    g.add_node(1)
-    g.add_node(2)
-    g.add_node(3)
+def check1():
+    """
+    This file represents a simple function name tester.
+    Make sure you run this example to check your naming.
+    :return:
+    """
+    g = DiGraph()  # creates an empty directed graph
+    for n in range(4):
+        g.add_node(n)
     g.add_edge(0, 1, 1)
     g.add_edge(1, 0, 1.1)
     g.add_edge(1, 2, 1.3)
     g.add_edge(2, 3, 1.1)
-    g.add_edge(1, 3, 3.3)
-   # g_algo.addEdge(0, 2, 3) # BUG - return dist = 3
-   # print(g_algo.shortestPath(0, 2))
-    print(g.allV())
-    g_algo = GraphAlgo(g)
+    g.add_edge(1, 3, 1.9)
+    g.remove_edge(1, 3)
+    g.add_edge(1, 3, 1.8)
+    print(g)  # prints the __repr__ (func output)
+    print(g.get_all_v())  # prints a dict with all the graph's vertices.
+    g_algo = GraphAlgo(g)  # init a GraphAlgo from an existing graph
     print(g.all_in_edges_of_node(1))
     print(g.all_out_edges_of_node(1))
-    print(g_algo.shortestPath(0, 3))
-    print(g_algo.connectedComponents())
-    str = "T0.json"
-    g_algo.save2Json(str)
-    g_algo.plotGraph()
+    print(g_algo.connected_components())
+    print(g_algo.shortest_path(0, 3))
+    print(g_algo.shortest_path(3, 1))
+    file = "../data/T0.json"
+    g_algo.save_to_json(file)
+    g_algo.load_from_json(file)
+    g_algo.plot_graph()
 
 
-    #main() # BUG wrong load form file (no edges
+def check2():
+    g_algo = GraphAlgo()
+    file = '../data/A5'
+    g_algo.load_from_json(file)
+    g_algo.get_graph().remove_edge(13, 14)
+    g_algo.save_to_json(file + "_edited")
+    dist, path = g_algo.shortest_path(1, 7)
+    print(dist, path)
+    dist, path = g_algo.shortest_path(47, 19)
+    print(dist, path)
+    dist, path = g_algo.shortest_path(20, 2)
+    print(dist, path)
+    dist, path = g_algo.shortest_path(2, 20)
+    print(dist, path)
+    print(g_algo.connected_component(0))
+    print(g_algo.connected_components())
+    g_algo.plot_graph()
+
+
+if __name__ == '__main__':
+    check1()
+    check2()
