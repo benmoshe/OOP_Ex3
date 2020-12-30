@@ -1,4 +1,4 @@
-from GraphInterface import GraphInteface
+from GraphInterface import GraphInterface
 
 kOUT = "out"
 kIN = "in"
@@ -13,14 +13,14 @@ class Node(object):
         self.score = float('inf')
 
     def __repr__(self):
-        # return "{}: OE={}, IE={}".format(self.n_id, len(self.out_edge), len(self.in_edge))
-        return "{}: score {}".format(self.n_id, self.score)
+        # return "{}: score {}".format(self.n_id, self.score)
+        return "{}: |edges out| {} |edges in| {}".format(self.n_id, len(self.out_edge), len(self.in_edge))
 
     def __lt__(self, other):
         return self.score < other.score
 
 
-class DiGraph(GraphInteface):
+class DiGraph(GraphInterface):
 
     def __init__(self):
         self.nodes = dict()

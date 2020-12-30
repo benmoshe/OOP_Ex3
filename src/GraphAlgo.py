@@ -44,7 +44,7 @@ class GraphAlgo(GraphAlgoInterface):
                     dst = e['dest']
                     w = e['w']
                     self.di_graph.add_edge(src, dst, w)
-        except:
+        except FileNotFoundError:
             return False
         return True
 
@@ -68,7 +68,7 @@ class GraphAlgo(GraphAlgoInterface):
         try:
             with open(file_name, 'w') as json_file:
                 json.dump(graph_json, json_file)
-        except:
+        except FileNotFoundError:
             return False
 
         return True
@@ -97,7 +97,7 @@ class GraphAlgo(GraphAlgoInterface):
 
             for p_idx, e_weight in pivot.out_edge.items():
                 neigh = self.di_graph.nodes[p_idx]
-                if neigh in explored_nodes:
+                if neigh in explored_nodes or neigh in node_lst:
                     continue
                 neigh.parent = pivot
                 neigh.score = pivot.score + e_weight
@@ -178,13 +178,13 @@ class GraphAlgo(GraphAlgoInterface):
             for o in n.out_edge.keys():
                 dx = nodes[o].pos[0] - n.pos[0]
                 dy = nodes[o].pos[1] - n.pos[1]
-                l = np.sqrt(dx ** 2 + dy ** 2)
+                edge_len = np.sqrt(dx ** 2 + dy ** 2)
                 plt.arrow(n.pos[0], n.pos[1],
                           dx, dy,
                           color='k',
                           length_includes_head=True,
-                          head_width=0.05 * l,
-                          head_length=0.1 * l,
+                          head_width=0.05 * edge_len,
+                          head_length=0.1 * edge_len,
                           width=diff_x
                           )
             plt.text(n.pos[0] + a_pad, n.pos[1], n.n_id, fontsize=12, color='limegreen')
