@@ -97,12 +97,18 @@ class GraphAlgo(GraphAlgoInterface):
 
             for p_idx, e_weight in pivot.out_edge.items():
                 neigh = self.di_graph.nodes[p_idx]
-                if neigh in explored_nodes or neigh in node_lst:
+                if neigh in explored_nodes:
                     continue
-                neigh.parent = pivot
-                neigh.score = pivot.score + e_weight
+                if neigh in node_lst:
+                    if neigh.score < pivot.score+e_weight:
+                        continue
+                    neigh.parent = pivot
+                    neigh.score = pivot.score + e_weight
+                else:
+                    neigh.parent = pivot
+                    neigh.score = pivot.score + e_weight
 
-                heapq.heappush(node_lst, neigh)
+                    heapq.heappush(node_lst, neigh)
 
         if found:
             path = []
