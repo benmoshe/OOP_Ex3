@@ -1,5 +1,6 @@
 import heapq
 import json
+import time
 from copy import deepcopy
 from typing import List
 
@@ -61,7 +62,7 @@ class GraphAlgo(GraphAlgoInterface):
             for k, v in n.out_edge.items():
                 graph_json["Edges"].append({
                     "src": n.n_id,
-                    "dest": k,
+                    "dest": int(k),
                     "w": v
                 })
 
@@ -79,7 +80,7 @@ class GraphAlgo(GraphAlgoInterface):
         If there is no path from id1 to id2, returns (float('inf'),[])
         """
         if id1 not in self.di_graph.nodes or id2 not in self.di_graph.nodes:
-            return float('inf'), None
+            return float('inf'), []
         if id1 == id2:
             return 0, [id1]
         node_lst = [self.di_graph.nodes[id1]]
@@ -99,16 +100,14 @@ class GraphAlgo(GraphAlgoInterface):
                 neigh = self.di_graph.nodes[p_idx]
                 if neigh in explored_nodes:
                     continue
-                if neigh in node_lst:
-                    if neigh.score < pivot.score+e_weight:
-                        continue
-                    neigh.parent = pivot
-                    neigh.score = pivot.score + e_weight
-                else:
-                    neigh.parent = pivot
-                    neigh.score = pivot.score + e_weight
 
-                    heapq.heappush(node_lst, neigh)
+                new_score = pivot.score + e_weight
+                if neigh in node_lst and neigh.score < new_score:
+                    continue
+
+                neigh.parent = pivot
+                neigh.score = new_score
+                heapq.heappush(node_lst, neigh)
 
         if found:
             path = []
@@ -120,48 +119,75 @@ class GraphAlgo(GraphAlgoInterface):
 
             return self.di_graph.nodes[id2].score, path
         else:
-            return float('inf'), None
+            return float('inf'), []
 
     @staticmethod
-    def dfs(di_graph: DiGraph, id1: int):
-        stack = [id1]
+    def dfs(di_graph: DiGraph, id1: int, skip_list: set = None):
+        if skip_list is None:
+            skip_list = set()
+        stack = {id1}
         explored = set()
         while stack:
             pivot = stack.pop()
+            if pivot in skip_list:
+                continue
             explored.add(pivot)
-            p_neighbors = list(di_graph.nodes[pivot].out_edge.keys())
-            [stack.append(v) for v in p_neighbors if v not in explored]
+            stack.update(set(di_graph.nodes[pivot].out_edge.keys()) - explored)
 
-        return list(explored)
+        return explored
+
+    @staticmethod
+    def revDfs(di_graph: DiGraph, id1: int, skip_list: set = None):
+        if skip_list is None:
+            skip_list = set()
+        stack = {id1}
+        explored = set()
+        while stack:
+            pivot = stack.pop()
+            if pivot in skip_list:
+                continue
+            explored.add(pivot)
+            stack.update(set(di_graph.nodes[pivot].in_edge.keys()) - explored)
+
+        return explored
 
     def connected_component(self, id1: int) -> list:
         """the strongly  connected  component of id1."""
 
-        con_fwd = set(GraphAlgo.dfs(self.di_graph, id1))
-        reverse_graph = deepcopy(self.di_graph)
-        for n in reverse_graph.nodes.values():
-            n.out_edge, n.in_edge = n.in_edge, n.out_edge
-
-        con_bwd = set(GraphAlgo.dfs(reverse_graph, id1))
+        con_fwd = GraphAlgo.dfs(self.di_graph, id1)
+        con_bwd = GraphAlgo.revDfs(self.di_graph, id1)
         return list(con_bwd & con_fwd)
+
+    def connected_component_set(self, id1: int, explored: set) -> set:
+        """the strongly  connected  component of id1."""
+
+        con_fwd = GraphAlgo.dfs(self.di_graph, id1, explored)
+        con_bwd = GraphAlgo.revDfs(self.di_graph, id1, explored)
+        return con_bwd & con_fwd
 
     def connected_components(self) -> List[list]:
         """ a list of ALL strongly  connected  components of self."""
-        all_nodes = list(self.di_graph.nodes.keys())
+        # st = time.time()
+        # graph_algo_copy = GraphAlgo(deepcopy(self.di_graph))
+        # print(time.time() - st)
+        all_nodes = set(self.di_graph.nodes.keys())
 
         all_comps = []
+        explored = set()
         while all_nodes:
-            v = all_nodes[0]
-            cc_v = self.connected_component(v)
-            [all_nodes.remove(v_r) for v_r in cc_v]
+            v = all_nodes.pop()
+            cc_v = self.connected_component_set(v, explored)
+            all_nodes.difference_update(cc_v)
+            # [graph_algo_copy.di_graph.fast_node_remove(v_r) for v_r in cc_v]
+            explored.update(cc_v)
             all_comps.append(cc_v)
 
-        return all_comps
+        return [list(x) for x in all_comps]
 
     def plot_graph(self) -> None:
         """"""
         np.random.seed(42)
-        w = h = len(self.di_graph.nodes) ** 1.5
+        w = h = 100
         nodes = [v for v in self.di_graph.nodes.values()]
         placed = []
         min_x, max_x = 0, 0
@@ -176,22 +202,19 @@ class GraphAlgo(GraphAlgoInterface):
             max_x = max(max_x, n.pos[0])
             placed.append(n)
 
-        diff_x = max_x - min_x
-        diff_x = diff_x / 1000000
         nodes = {n.n_id: n for n in placed}
         a_pad = .0
         for n in nodes.values():
             for o in n.out_edge.keys():
                 dx = nodes[o].pos[0] - n.pos[0]
                 dy = nodes[o].pos[1] - n.pos[1]
-                edge_len = np.sqrt(dx ** 2 + dy ** 2)
                 plt.arrow(n.pos[0], n.pos[1],
                           dx, dy,
-                          color='k',
+                          # color='k',
                           length_includes_head=True,
-                          head_width=0.05 * edge_len,
-                          head_length=0.1 * edge_len,
-                          width=diff_x
+                          head_width=w / 130,
+                          head_length=w / 80,
+                          width=0.00001 * w
                           )
             plt.text(n.pos[0] + a_pad, n.pos[1], n.n_id, fontsize=12, color='limegreen')
         for n in nodes.values():

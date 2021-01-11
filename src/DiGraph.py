@@ -51,7 +51,9 @@ class DiGraph(GraphInterface):
         return True
 
     def add_edge(self, id1: int, id2: int, weight: float) -> bool:
-        if id1 not in self.nodes or id2 not in self.nodes:
+        if id1 not in self.nodes \
+                or id2 not in self.nodes \
+                or id1 == id2:
             return False
 
         self.nodes[id1].out_edge[id2] = weight
@@ -65,10 +67,17 @@ class DiGraph(GraphInterface):
         if node_id not in self.nodes:
             return False
         for k in self.nodes[node_id].in_edge.keys():
-            self.nodes[k].remove(node_id)
+            if k in self.nodes:
+                self.nodes[k].out_edge.pop(node_id)
         self.nodes.pop(node_id)
         self._mc += 1
         return True
+
+    def fast_node_remove(self, node_id: int) -> None:
+        for k in self.nodes[node_id].in_edge.keys():
+            if k in self.nodes:
+                self.nodes[k].out_edge.pop(node_id)
+        self.nodes.pop(node_id)
 
     def remove_edge(self, node_id1: int, node_id2: int) -> bool:
         if node_id1 not in self.nodes[node_id2].in_edge:
