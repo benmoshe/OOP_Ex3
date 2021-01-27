@@ -9,17 +9,19 @@ import numpy as np
 
 
 def randCheck():
-    # np.random.seed(0)
-    # n_nodes = int(1e6)
-    # g = DiGraph()  # creates an empty directed graph
-    # for n in range(n_nodes):
-    #     g.add_node(n)
-    # for n in range(int(n_nodes * 7)):
-    #     a, b = np.random.randint(0, n_nodes, (2, 1)).flatten()
-    #     w = np.random.random() * 10
-    #     g.add_edge(a, b, w)
-    # g_algo = GraphAlgo(g)
-    # g_algo.save_to_json("1mil.json")
+    np.random.seed(0)
+    n_nodes = int(1e6)
+    for n_nodes in [1e3, 1e4, 1e5]:
+        g = DiGraph()  # creates an empty directed graph
+        for n in range(int(n_nodes)):
+            g.add_node(n)
+        for n in range(int(n_nodes * 7)):
+            a, b = np.random.randint(0, n_nodes, (2, 1)).flatten()
+            w = np.random.random() * 10
+            g.add_edge(a, b, w)
+        g_algo = GraphAlgo(g)
+        g_algo.save_to_json("T_" + str(n_nodes) + ".json")
+    return
 
     g_algo = GraphAlgo()
     # g_algo.load_from_json('100.json')
@@ -52,34 +54,42 @@ def nxLoad(file_name) -> nx.DiGraph:
             src = e['src']
             dst = e['dest']
             w = e['w']
-            di_graph.add_edge(src, dst, weight=w)
+            di_graph.add_weighted_edges_from([(src, dst, w)])
 
     return di_graph
 
 
 def nxCompare():
     g_algo = GraphAlgo()
-    for json_path in [x for x in os.listdir('../data/') if x.startswith('G_')]:
-        json_path = '1mil.json'
-        # json_path = '../data/G_30000_240000_0.json'
-        # json_path = '../data/' + json_path
-
-        # Mine
-        g_algo.load_from_json(json_path)
+    # for json_path in [x for x in os.listdir('../data/') if x.startswith('T_')]:
+    for json_path in [x for x in os.listdir() if x.startswith('T_')]:
         print(json_path)
-        st = time.time()
-        mcc = g_algo.connected_components()
-        mtime = time.time() - st
+        # json_path = '../data/' + json_path
+        json_path = json_path
+        # json_path = '1mil.json'
+        # json_path = '../data/G_30000_240000_0.json'
 
         # NetworkX
         nx_graph = nxLoad(json_path)
         st = time.time()
-        cc = nx.strongly_connected_components(nx_graph)
+        # cc = nx.strongly_connected_components(nx_graph)
+        cc = nx.shortest_path(nx_graph, 1, 25, weight='weight')
+        path_len = nx.shortest_path_length(nx_graph, 1, 25, weight='weight')
         nxtime = time.time() - st
+        print(path_len, cc)
+
+        # Mine
+        g_algo.load_from_json(json_path)
+        st = time.time()
+        mcc = g_algo.shortest_path(1, 25)
+        mtime = time.time() - st
+        print("Mine")
+        print(mcc)
+
         print("Mine:\t\tTime:{:}".format(mtime))
         print("NetworkX:\tTime:{:}".format(nxtime))
         print(len(mcc), len(list(cc)))
-        break
+        # break
 
 
 def check():
@@ -101,10 +111,10 @@ def check():
     """
     # check0()
     # check1()
-    # check2()
+    check2()
 
     # randCheck()
-    nxCompare()
+    # nxCompare()
 
 
 def check0():

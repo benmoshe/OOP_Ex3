@@ -11,9 +11,9 @@ class Node(object):
         self.in_edge = dict()
         self.pos = pos
         self.score = float('inf')
+        self.exp = False
 
     def __repr__(self):
-        # return "{}: score {}".format(self.n_id, self.score)
         return "{}: |edges out| {} |edges in| {}".format(self.n_id, len(self.out_edge), len(self.in_edge))
 
     def __lt__(self, other):

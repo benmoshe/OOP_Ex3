@@ -2,14 +2,14 @@ import heapq
 import json
 import time
 from copy import deepcopy
-from typing import List
+from typing import List, Set
 
 from DiGraph import DiGraph
 from GraphAlgoInterface import GraphAlgoInterface
 import numpy as np
 import matplotlib.pyplot as plt
 
-from src import GraphInterface
+import GraphInterface
 
 
 class GraphAlgo(GraphAlgoInterface):
@@ -46,12 +46,17 @@ class GraphAlgo(GraphAlgoInterface):
                     w = e['w']
                     self.di_graph.add_edge(src, dst, w)
         except FileNotFoundError:
+            print("File not found! " + file_name)
             return False
         return True
 
     def save_to_json(self, file_name: str) -> bool:
+        """
+        Save the graph to a json file
 
-        """save the graph to a json file"""
+        @param file_name: The file path to save the json/
+        """
+
         graph_json = {"Nodes": [],
                       "Edges": []}
         for n in self.di_graph.nodes.values():
@@ -78,51 +83,62 @@ class GraphAlgo(GraphAlgoInterface):
         """
         Returns a tuple with the length of the shortest path and the path as a list.
         If there is no path from id1 to id2, returns (float('inf'),[])
+
+        @param id1: The source node id
+        @param id2: The target node id
+        @return: The distance between and the path of nodes (name only)
         """
         if id1 not in self.di_graph.nodes or id2 not in self.di_graph.nodes:
             return float('inf'), []
         if id1 == id2:
             return 0, [id1]
-        node_lst = [self.di_graph.nodes[id1]]
-        node_lst[0].score = 0
-        explored_nodes = set()
-        heapq.heapify(node_lst)
+
+        node_lst = []
+        self.di_graph.nodes[id1].score = 0
+        heapq.heappush(node_lst, self.di_graph.nodes[id1])
 
         found = False
-        while len(node_lst) > 0 and not found:
+        while node_lst:
             pivot = heapq.heappop(node_lst)
-            explored_nodes.add(pivot)
+            if found and self.di_graph.nodes[id2].score < pivot.score:
+                break
+
+            pivot.exp = True
             if pivot.n_id == id2:
                 found = True
-                break
 
             for p_idx, e_weight in pivot.out_edge.items():
                 neigh = self.di_graph.nodes[p_idx]
-                if neigh in explored_nodes:
+                if neigh.exp:
                     continue
 
                 new_score = pivot.score + e_weight
-                if neigh in node_lst and neigh.score < new_score:
-                    continue
-
-                neigh.parent = pivot
-                neigh.score = new_score
-                heapq.heappush(node_lst, neigh)
+                if new_score < neigh.score:
+                    neigh.parent = pivot
+                    neigh.score = new_score
+                    heapq.heappush(node_lst, neigh)
 
         if found:
             path = []
             curr = self.di_graph.nodes[id2]
             while not curr.n_id == id1:
-                path.insert(0, curr.n_id)
+                path.append(curr.n_id)
                 curr = curr.parent
-            path.insert(0, curr.n_id)
+            path.append(curr.n_id)
 
-            return self.di_graph.nodes[id2].score, path
-        else:
-            return float('inf'), []
+            return self.di_graph.nodes[id2].score, path[::-1]
+
+        return float('inf'), []
 
     @staticmethod
-    def dfs(di_graph: DiGraph, id1: int, skip_list: set = None):
+    def dfs(di_graph: DiGraph, id1: int, skip_list: set = None) -> Set[str]:
+        """
+        DFS algorithm that finds all the nodes that can be reached from node id1.
+        @param di_graph: The graph
+        @param id1: The source node
+        @param skip_list: Set of nodes that are not to be considered
+        @return: Set of nodes
+        """
         if skip_list is None:
             skip_list = set()
         stack = {id1}
@@ -137,7 +153,15 @@ class GraphAlgo(GraphAlgoInterface):
         return explored
 
     @staticmethod
-    def revDfs(di_graph: DiGraph, id1: int, skip_list: set = None):
+    def revDfs(di_graph: DiGraph, id1: int, skip_list: set = None)->Set[str]:
+        """
+        Reverse DFS algorithm that finds all the nodes that can be reached from node id1.
+        Instead of traveling on the out-going edges, it travels on the in-going edges.
+        @param di_graph: The graph
+        @param id1: The source node
+        @param skip_list: Set of nodes that are not to be considered
+        @return: Set of nodes
+        """
         if skip_list is None:
             skip_list = set()
         stack = {id1}
@@ -152,24 +176,34 @@ class GraphAlgo(GraphAlgoInterface):
         return explored
 
     def connected_component(self, id1: int) -> list:
-        """the strongly  connected  component of id1."""
+        """
+        The strongly  connected  component of id1.
+        @param id1: The source node
+        @return: List of all the nodes in the SCC
+        """
 
         con_fwd = GraphAlgo.dfs(self.di_graph, id1)
         con_bwd = GraphAlgo.revDfs(self.di_graph, id1)
         return list(con_bwd & con_fwd)
 
     def connected_component_set(self, id1: int, explored: set) -> set:
-        """the strongly  connected  component of id1."""
+        """
+        The strongly  connected  component of id1.
+        @param id1: The source node
+        @param explored: Set of explored nodes to ignore
+        @return: Set of all the nodes in the SCC
+        """
 
         con_fwd = GraphAlgo.dfs(self.di_graph, id1, explored)
         con_bwd = GraphAlgo.revDfs(self.di_graph, id1, explored)
         return con_bwd & con_fwd
 
     def connected_components(self) -> List[list]:
-        """ a list of ALL strongly  connected  components of self."""
-        # st = time.time()
-        # graph_algo_copy = GraphAlgo(deepcopy(self.di_graph))
-        # print(time.time() - st)
+        """
+        A list of ALL strongly  connected  components of self.
+        @return: A list of all the SCC in the graph.
+        """
+
         all_nodes = set(self.di_graph.nodes.keys())
 
         all_comps = []
@@ -178,15 +212,17 @@ class GraphAlgo(GraphAlgoInterface):
             v = all_nodes.pop()
             cc_v = self.connected_component_set(v, explored)
             all_nodes.difference_update(cc_v)
-            # [graph_algo_copy.di_graph.fast_node_remove(v_r) for v_r in cc_v]
             explored.update(cc_v)
             all_comps.append(cc_v)
 
         return [list(x) for x in all_comps]
 
     def plot_graph(self) -> None:
-        """"""
-        np.random.seed(42)
+        """
+        Plots the graph using Matplotlib
+        @return: None
+        """
+        np.random.seed(42)  # For stability
         w = h = 100
         nodes = [v for v in self.di_graph.nodes.values()]
         placed = []
@@ -208,13 +244,14 @@ class GraphAlgo(GraphAlgoInterface):
             for o in n.out_edge.keys():
                 dx = nodes[o].pos[0] - n.pos[0]
                 dy = nodes[o].pos[1] - n.pos[1]
+                dist = np.sqrt(np.square(dx) + np.square(dy))
                 plt.arrow(n.pos[0], n.pos[1],
                           dx, dy,
-                          # color='k',
+                          color='k',
                           length_includes_head=True,
-                          head_width=w / 130,
-                          head_length=w / 80,
-                          width=0.00001 * w
+                          head_width=dist * 0.05,
+                          head_length=dist * 0.05,
+                          width=0.00001 / w
                           )
             plt.text(n.pos[0] + a_pad, n.pos[1], n.n_id, fontsize=12, color='limegreen')
         for n in nodes.values():
