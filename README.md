@@ -1,2 +1,1 @@
-# OOP_Ex3
-This is a private repo for OOP_EX3
+# Ariel University OOP 2020/21 Ex 3
